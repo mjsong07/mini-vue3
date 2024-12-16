@@ -19,7 +19,8 @@ class ComputedRefImpl {
   constructor(getter, setter) {
     this._setter = setter
     this._val = undefined
-    this._dirty = true
+    this._dirty = true 
+    track(this, 'value')
     // computed就是一个特殊的effect，设置lazy和执行时机
     this.effect = effect(getter, {
       lazy: true,
@@ -32,7 +33,6 @@ class ComputedRefImpl {
     })
   }
   get value() {
-    track(this, 'value')
     if (this._dirty) {
       this._dirty = false
       this._val = this.effect()

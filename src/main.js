@@ -4,22 +4,17 @@ import App from './App.vue'
 createApp(App)
   .mount('#app')
 
-async function test(){
-  await delyError('ref is not defined')
-}
 
-async function test2(){
-  try{
-    await delyError('reactive is not defined')
-  }catch(e){
-    console.error(e)
+  function createPromiseError(msg) {
+    return new Promise((resolve,reject) => {
+      setTimeout(() => {
+        reject(msg)
+      }, 2000);
+    })
   }
-}
-test()
-function delyError(message){
-  return new Promise((resolve,reject)=>{
-    setTimeout(()=>{
-      reject({message})
-    },1000)
-  })
-}
+  
+
+  async function testErrorFn() { 
+      await createPromiseError("网络异常")  
+  }
+  testErrorFn()

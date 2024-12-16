@@ -12,29 +12,27 @@ import {
 import { transformFromAstSync } from '@babel/core' 
 
 const catchStatement = parse(`
-  console.error(err)
-  console.log('https://stackoverflow.com/search?q=[js]+'+encodeURI(err.message))
+  console.error('error:'+err)
+  console.log('https://www.google.com/search?q=+'+encodeURI(err)) // 同时输出谷歌查询
 `).program.body
 
-export default function autoImportPlugin() {
+export default function autoTryCatchPlugin() {
   return {
-    name: 'vite-plugin-auto-try', // 必须的，将会在 warning 和 error 中显示
+    name: 'vite-plugin-auto-trycatch', // 
     enforce:'pre',
     transform(code,id){
         let fileReg = /\.js$/
-        if(fileReg.test(id)){
+        if(fileReg.test(id)){ // 只过滤处理js的代码
         const ast = parse(code, {
           sourceType: 'module'
         })
-        console.log(ast)
+        // console.log(ast)
         traverse(ast, {
           AwaitExpression(path){
-            if (path.findParent((path) => isTryStatement(path.node))) {
-              // 已经有try了
+            if (path.findParent((path) => isTryStatement(path.node))) { // 如果有try了 直接返回
               return 
-            }
-            // isBlockStatement 是否函数体
-            const blockParentPath = path.findParent((path) => isBlockStatement(path.node))
+            } 
+            const blockParentPath = path.findParent((path) => isBlockStatement(path.node)) //isBlockStatement是否函数体
             const tryCatchAst  = tryStatement(
               blockParentPath.node,
               // ast中新增try的ast
@@ -42,9 +40,8 @@ export default function autoImportPlugin() {
                 identifier('err'),
                 blockStatement(catchStatement),
               )
-            )
-            // 使用有try的ast替换之前的ast
-            blockParentPath.replaceWithMultiple([tryCatchAst])
+            ) 
+            blockParentPath.replaceWithMultiple([tryCatchAst])  // 使用有try的ast替换之前的ast
 
           }
         })
@@ -52,7 +49,7 @@ export default function autoImportPlugin() {
         code = transformFromAstSync(ast,"",{
           configFile:false
         }).code
-
+        console.log(code)
         return code
       }
       return code
